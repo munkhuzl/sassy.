@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 4000;
 
 // MongoDB connection string
 const mongoUri =
-  'mongodb+srv://bolzopzulaa:VU6dlVlK7CdYHCgU@cluster0.r7vw0.mongodb.net/SASSYNAIL?retryWrites=true&w=majority&appName=Cluster0';
+  'mongodb+srv://munkhzul:zulaa1234@sassybooking.0jskx.mongodb.net/';
 
 // Middleware
 app.use(cors());
@@ -18,9 +18,19 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Connect to MongoDB
 mongoose
   .connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('Connected to MongoDB'))
+  .then(() => console.log('Connected to MongoDBa'))
   .catch((err) => console.error('Error connecting to MongoDB:', err));
 
+
+  app.get('/api/appointments', async (req, res) => {
+    try {
+      const appointments = await Appointment.find();
+      res.status(200).send(appointments);
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      res.status(500).send({ message: 'Internal server error' });
+    }
+  });
 // Define Schema and Model
 const appointmentSchema = new mongoose.Schema({
   email_address: { type: String, required: true },
@@ -33,46 +43,49 @@ const appointmentSchema = new mongoose.Schema({
 
 const Appointment = mongoose.model('Appointment', appointmentSchema);
 
-// Routes
-
-// Create a new appointment
 app.post('/api/appointments', async (req, res) => {
   try {
-    const { email_address, name, category, time, phone } = req.body;
-
-    if (!email_address || !name || !category || !time || !phone) {
+    const { email_address, name, category, time, phone, _id} = req.body;
+    if (!email_address || !name || !category || !time || !phone, _id) {
       return res.status(400).send({ message: 'All fields are required!' });
     }
-
-    // Parse time into a full Date object
     const [hours, minutes] = time.split(':');
     const appointmentDate = new Date();
-    appointmentDate.setHours(hours, minutes, 0, 0); // Set time on today's date
-
+    appointmentDate.setHours(hours, minutes, 0, 0); 
     const newAppointment = new Appointment({
+      _id,
       email_address,
       name,
+      time,
       category,
       time: appointmentDate,
       phone,
+      createdAt,
     });
     await newAppointment.save();
-
-    res.status(201).send({ message: 'Таны цаг амжилттай баталгаажлаа!', appointment: newAppointment });
+    res.status(201).send({ message: 'Таны цаг амжилттай илгээгдлээ!', appointment: newAppointment });
   } catch (error) {
     console.error('Error creating appointment:', error);
-    res.status(500).send({ message: 'Internal server error' });
+    res.status(500).send({ message: 'Илгээхэд алдаа гарлаа' });
   }
 });
-
-// Get all appointments
-app.get('/api/appointments', async (req, res) => {
+// Delete an appointment by ID
+app.delete('/api/appointments/${_id}', async (req, res) => {
   try {
-    const appointments = await Appointment.find();
-    res.status(200).send(appointments);
+    const { _id } = req.params;
+    if (!_id) {
+      return res.status(400).send({ message: 'Appointment ID is required' });
+    }
+
+    const deletedAppointment = await Appointment.findByIdAndDelete(_id);
+    if (!deletedAppointment) {
+      return res.status(404).send({ message: 'Appointment not found' });
+    }
+
+    res.status(200).send({ message: 'Appointment deleted successfully' });
   } catch (error) {
-    console.error('Error fetching appointments:', error);
-    res.status(500).send({ message: 'Internal server error' });
+    console.error('Error deleting appointment:', error);
+    res.status(500).send({ message: 'Устгахад алдаа гарлла' });
   }
 });
 
@@ -80,3 +93,5 @@ app.get('/api/appointments', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`[server]: Server is running on http://localhost:${PORT}`);
 });
+
+

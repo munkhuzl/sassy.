@@ -651,7 +651,7 @@
                     event.preventDefault();
                     const formData = new FormData(this);
                     const data = Object.fromEntries(formData.entries());
-                    if (!data.name || !data.email_address || !data.phone || !data.category || !data.date) {
+                    if (!data.name || !data.email_address || !data.phone || !data.category || !data.date || !data.time) {
                       alert('Please fill out all required fields.');
                       return;
                     }

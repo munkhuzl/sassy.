@@ -23,93 +23,85 @@
         margin: 5px;
         cursor: pointer;
       }
+      .error {
+        color: red;
+      }
     </style>
   </head>
   <body>
-    <h1>Admin Panel</h1>
-    <h2>Appointments</h2>
+    <h1>Sassy</h1>
+    <h2>Захиалгууд</h2>
+    <div id="loading" style="display: none">Уншиж байна...</div>
+    <div id="message"></div>
     <table id="appointmentsTable">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Phone</th>
-          <th>Category</th>
-          <th>Actions</th>
+          <th>Нэр</th>
+          <th>И-мэйл</th>
+          <th>Утасны дугаар</th>
+          <th>Үйлчилгээ</th>
+          <th>Цаг</th>
+          <th>Захиалга өгсөн цаг</th>
+          <th>Устгах</th>
+          <th class="block" type="hidden">_id</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="appointmentsTableBody">
         <tr>
-          <td colspan="5">No appointments available.</td>
+          <td colspan="5">Цаг байхгүй байна</td>
         </tr>
       </tbody>
     </table>
 
     <script>
       async function fetchAppointments() {
-        const loadingDiv = document.getElementById('loading');
-        const messageDiv = document.getElementById('message');
-        const tableBody = document.getElementById('appointmentForm');
-
-        loadingDiv.style.display = 'block';
-        messageDiv.innerHTML=' unshij baina'
-
-        try{
-          const response = await fetch('http://localhost:4000/api/appointments')
-          if(!response.ok){
-            throw new Error('failed to fetch appointments');
+        const loadingDiv = document.getElementById("loading");
+        const messageDiv = document.getElementById("message");
+        const tableBody = document.getElementById("appointmentsTableBody");
+        loadingDiv.style.display = "block";
+        messageDiv.innerHTML = "";
+        try {
+          const response = await fetch(
+            "http://localhost:4000/api/appointments"
+          );
+          if (!response.ok) {
+            throw new Error("Failed to fetch appointments");
           }
-          const appointments = await response.json()
-          tableBody,innerHTML = '';
-          if(appointments.length===0){
-            tableBody.innerHTML= '<tr><td colspan="7"> Цаг байхгүй байна</td></tr>';
-          }
-          else {
-            appointments.forEach(app => {
-              const row = document.createElement('tr')
-              row.innerHTML=`
+          const appointments = await response.json();
+          tableBody.innerHTML = ""; 
+          if (appointments.length === 0) {
+            tableBody.innerHTML =
+              '<tr><td colspan="5">No appointments available.</td></tr>';
+          } else {
+            appointments.forEach((app, _id) => {
+              const row = document.createElement("tr");
+              row.innerHTML = `
+                      <td>${app.name}</td>
+                      <td>${app.email_address}</td>
+                      <td>${app.phone}</td>
+                      <td>${app.category}</td>
+                      <td>${app.createdAt}</td>
+                      <td>${app.time}</td>
 
-              <td>${app.name}</td>
-                  <td>${app.email_address}</td>
-                  <td>${app.phone}</td>
-                  <td>${app.category}</td>
-                  <td>${app.date || 'Not Provided'}</td>
-                  <td>${app.message || 'No Message'}</td>
-                  <td>
-                    <button onclick="deleteAppointment('${app.id}')">Delete</button>
-                  </td>`;
-                  tableBody.appendChild(row);
+                      <td>
+                        <button onclick="deleteAppointment('${app._id}')">Delete</button>
+                      </td>
+                      <td>${app._id}</td>
+
+                      `;
+              tableBody.appendChild(row);
             });
           }
         } catch (error) {
-        console.log('error fetching appointments:', error);
-        messageDiv.innerHTML= '<span class="error">Error fetching appointments. Please try again later.</span>'
-      }
-      finally{
-        loadingDiv.style.display = 'none'
-
-      }
-      fetchAppointments();
-      async function deleteAppointment(id) {
-          try {
-            const response = await fetch(`http://localhost:4000/api/appointments/${id}`, {
-              method: 'DELETE',
-            });
-
-            const result = await response.json();
-            if (!response.ok) {
-              throw new Error(result.message || 'Failed to delete appointment');
-            }
-
-            alert(result.message);
-            fetchAppointments(); // Refresh the list
-          } catch (error) {
-            console.error('Error deleting appointment:', error);
-            alert('Error deleting appointment. Please try again later.');
-          }
+          console.error("Error fetching appointments:", error);
+          messageDiv.innerHTML =
+            '<span class="error">Error fetching appointments. Please try again later.</span>';
+        } finally {
+          loadingDiv.style.display = "none";
         }
-   
       }
+
+      fetchAppointments();
     </script>
   </body>
 </html>
