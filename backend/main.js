@@ -1,7 +1,7 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const mongoose = require('mongoose');
+import express from 'express';
+import  bodyParser from 'body-parser';
+import cors from 'cors';
+import mongoose from 'mongoose';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -15,11 +15,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Connect to MongoDB
 mongoose
-  .connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(mongoUri)
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('Error connecting to MongoDB:', err));
-
-
 
   app.get('/api/appointments', async (req, res) => {
     try {
@@ -30,7 +28,7 @@ mongoose
       res.status(500).send({ message: 'Internal server error' });
     }
   });
-// Define Schema and Model
+
 const appointmentSchema = new mongoose.Schema({
   email_address: { type: String, required: true },
   name: { type: String, required: true },
@@ -38,64 +36,66 @@ const appointmentSchema = new mongoose.Schema({
   time: { type: String, required: true },
   phone: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
+  message: { type: String, required: true },
 });
 
 const Appointment = mongoose.model('Appointment', appointmentSchema);
-export default async (req, res) => {
-  if (req.method === 'GET') {
-    try {
-      const appointments = await Appointment.find();
-      res.status(200).json(appointments);
-    } catch (error) {
-      res.status(500).json({ error: 'Error fetching appointments' });
-    }
-  } else if (req.method === 'POST') {
-    try {
-      const { email_address, name, category, time, phone } = req.body;
-      const newAppointment = new Appointment({ email_address, name, category, time, phone });
-      await newAppointment.save();
-      res.status(201).json({ message: 'Appointment created successfully' });
-    } catch (error) {
-      res.status(500).json({ error: 'Error creating appointment' });
-    }
-  } else {
-    res.status(405).json({ error: 'Method not allowed' });
-  }
-};
-// app.post('/api/appointments', async (req, res) => {
-//   try {
-//     const { email_address, name, category, time, phone, _id} = req.body;
-//     if (!email_address || !name || !category || !time || !phone, _id) {
-//       return res.status(400).send({ message: 'All fields are required!' });
+// export default async (req, res) => {
+//   if (req.method === 'GET') {
+//     try {
+//       const appointments = await Appointment.find();
+//       res.status(200).json(appointments);
+//     } catch (error) {
+//       res.status(500).json({ error: 'Error fetching appointments' });
 //     }
-//     const [hours, minutes] = time.split(':');
-//     const appointmentDate = new Date();
-//     appointmentDate.setHours(hours, minutes, 0, 0); 
-//     const newAppointment = new Appointment({
-//       _id,
-//       email_address,
-//       name,
-//       time,
-//       category,
-//       time: appointmentDate,
-//       phone,
-//       createdAt: new Date(),
-//     });
-//     await newAppointment.save();
-//     res.status(201).send({ message: 'Таны цаг амжилттай илгээгдлээ!', appointment: newAppointment });
-//   } catch (error) {
-//     console.error('Error creating appointment:', error);
-//     res.status(500).send({ message: 'Илгээхэд алдаа гарлаа' });
+//   } else if (req.method === 'POST') {
+//     try {
+//       const { email_address, name, category, time, phone } = req.body;
+//       const newAppointment = new Appointment({ email_address, name, category, time, phone });
+//       await newAppointment.save();
+//       res.status(201).json({ message: 'Appointment created successfully' });
+//     } catch (error) {
+//       res.status(500).json({ error: 'Error creating appointment' });
+//     }
+//   } else {
+//     res.status(405).json({ error: 'Method not allowed' });
 //   }
-// });
-// Delete an appointment by ID
-app.delete('/api/appointments/${_id}', async (req, res) => {
+// };
+app.post('/api/appointments', async (req, res) => {
   try {
-    const { _id } = req.params;
-    if (!_id) {
+    const { email_address, name, category, time, phone, _id, message} = req.body;
+    if (!email_address || !name || !category || !time || !phone, _id) {
+      return res.status(400).send({ message: 'All fields are required!' });
+    }
+    const [hours, minutes] = time.split(':');
+    const appointmentDate = new Date();
+    appointmentDate.setHours(hours, minutes, 0, 0); 
+    const newAppointment = new Appointment({
+      _id,
+      email_address,
+      name,
+      time,
+      category,
+      time: appointmentDate,
+      phone,
+      createdAt: new Date(),
+      message,
+    });
+    await newAppointment.save();
+    res.status(201).send({ message: 'Таны цаг амжилттай илгээгдлээ!', appointment: newAppointment });
+  } catch (error) {
+    console.error('Error creating appointment:', error);
+    res.status(500).send({ message: 'Илгээхэд алдаа гарлаа' });
+  }
+});
+
+app.delete('/api/appointments:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id === _id) {
       return res.status(400).send({ message: 'Appointment ID is required' });
     }
-
+ 
     const deletedAppointment = await Appointment.findByIdAndDelete(_id);
     if (!deletedAppointment) {
       return res.status(404).send({ message: 'Appointment not found' });

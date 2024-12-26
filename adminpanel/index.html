@@ -54,6 +54,24 @@
     </table>
 
     <script>
+      async function deleteAppointment(appointmentId) {
+        try {
+          const response = await fetch(
+            `http://localhost:4000/api/appointments`,
+            {
+              method: "DELETE",
+            }
+          );
+          if (!response.ok) {
+            throw new Error("Failed to delete the appointment");
+          }
+          alert("Appointment deleted successfully.");
+          fetchAppointments(); 
+        } catch (error) {
+          console.error("Error deleting appointment:", error);
+          alert("Error deleting appointment. Please try again.");
+        }
+      }
       async function fetchAppointments() {
         const loadingDiv = document.getElementById("loading");
         const messageDiv = document.getElementById("message");
@@ -68,7 +86,7 @@
             throw new Error("Failed to fetch appointments");
           }
           const appointments = await response.json();
-          tableBody.innerHTML = ""; 
+          tableBody.innerHTML = "";
           if (appointments.length === 0) {
             tableBody.innerHTML =
               '<tr><td colspan="5">No appointments available.</td></tr>';
@@ -82,7 +100,7 @@
                       <td>${app.category}</td>
                       <td>${app.createdAt}</td>
                       <td>${app.time}</td>
-
+                      <td>${app.message}</td>
                       <td>
                         <button onclick="deleteAppointment('${app._id}')">Delete</button>
                       </td>

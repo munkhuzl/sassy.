@@ -1,19 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Sassy Nail Bar</title>
-  <meta name="title" content="Barber - Barbers & Hair Cutting">
-  <meta name="description" content="This is a barber html template made by codewithsadee">
-
+  <meta name="title" content="Nail bar and Lash salon">
   <link rel="shortcut icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./assets/css/style.css">
-
- 
+  <link rel="stylesheet" href="./assets/css/style.css"> 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -627,7 +621,7 @@
                 </div>
                 <div class="input-wrapper">
                   <input type="text" name="phone" placeholder="Утасны дугаар" required class="input-field">
-                  <select name="category" class="input-field">
+                  <select name="category" class="input-field" required>
                     <option value="Select category">Үйлчилгээ сонгох</option>
                     <option value="Beauty & spa">Маникюр</option>
                     <option value="Body massage">Педикюр</option>
@@ -644,16 +638,15 @@
                 </button>
 
               </form>
-              <script>
+              <!-- <script>
                 document.getElementById('appointmentForm').addEventListener('submit', function (event) {
-                    event.preventDefault();
                     const formData = new FormData(this);
-                    const data = Object.fromEntries(formData.entries());
+                    const data = Object.fromEntries(FormData.entries());
                     if (!data.name || !data.email_address || !data.phone || !data.category || !data.date || !data.time) {
                       alert('Please fill out all required fields.');
                       return;
                     }
-                    fetch('http://localhost:4000/api/appointments', {
+                    fetch('/api/appointments', {
                       method: 'POST',
                       headers: {
                         'Content-Type': 'application/json',
@@ -668,21 +661,62 @@
                       })
                       .then(data => {
                         alert(data.message);
-                        this.reset(); // Clear the form after a successful submission
+                        this.reset(); 
                       })
                       .catch(error => {
                         console.error('Error:', error);
                         alert('Error submitting the form. Please try again.');
                       });
                   });
+              </script> -->
+              <script>
+                document.getElementById('appointmentForm').addEventListener('submit', async function (event) {
+                  event.preventDefault();
+                  const formData = new FormData(this);
+                  const data = Object.fromEntries(formData.entries());
+                  const requiredFields = ['name', 'email_address', 'phone', 'category', 'date', 'time', 'message'];
+                  for (const field of requiredFields) {
+                    if (!data[field]) {
+                      alert(`Please fill out the ${field.replace('_', ' ')} field.`);
+                      return;
+                    }
+                  }
+                  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                  if (!emailPattern.test(data.email_address)) {
+                    alert('Please enter a valid email address.');
+                    return;
+                  }
+                  const phonePattern = /^\d{8}$/; 
+                  if (!phonePattern.test(data.phone)) {
+                    alert('Please enter a valid phone number.');
+                    return;
+                  }
+                  try {
+                    const response = await fetch('http://localhost:4000/api/appointments', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(data),
+                    });
+                    if (!response.ok) {
+                      const errorData = await response.json();
+                      throw new Error(errorData.message || 'Failed to submit the appointment.');
+                    }
+                    const result = await response.json();
+                    alert(result.message);
+                    this.reset(); 
+                  } catch (error) {
+                    console.error('Error:', error);
+                    alert(`Error submitting the form: ${error.message}`);
+                  }
+                });
               </script>
+              
             </div>
               <img src="./assets/sassy bg_245x762.jpeg" width="250" height="774" loading="lazy" alt=""
                 class="img-cover">
             </figure>
 
           </div>
-
         </div>
       </section>
 
