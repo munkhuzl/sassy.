@@ -15,6 +15,7 @@
   },
   "scripts": {
     "start": "node main.js",
-    "dev": "nodemon main.js"
+    "dev": "nodemon main.js",
+    "build":"backend/main.js"
   }
 }
