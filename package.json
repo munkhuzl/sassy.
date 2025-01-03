@@ -9,13 +9,15 @@
     "nodemon": "^3.1.7",
     "uuid": "^10.0.0"
   },
-  "devDependencies": {  
+  "devDependencies": {
+    "@babel/cli": "^7.26.4",
+    "@babel/core": "^7.26.0",
     "@types/express": "^5.0.0",
     "@types/uuid": "^10.0.0"
   },
   "scripts": {
     "start": "node main.js",
     "dev": "nodemon main.js",
-    "build":"backend/main.js"
+    "build": "babel --out-dir dist"
   }
 }
